@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "750751907893",
+    "project_id": "worshipteamapp-c84e2",
+    "storage_bucket": "worshipteamapp-c84e2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750751907893:android:119af27d0a9b2c8bf0f17c",
+        "android_client_info": {
+          "package_name": "com.elimchurch.worshipteamapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTAC73lVugPL0We3DyH_F8KcADxe76rtc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

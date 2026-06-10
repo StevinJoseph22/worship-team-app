@@ -1,0 +1,135 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: Checks if the user is authenticated (including anonymous sign-ins)
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function: Get user document from the database
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    // Helper function: Checks if the logged-in user is a Worship Leader or Super Admin
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        (getUserData().role == 'worship_leader' || getUserData().role == 'super_admin');
+    }
+    
+    // Helper function: Checks if the logged-in user is specifically a Super Admin
+    function isSuperAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        getUserData().role == 'super_admin';
+    }
+
+    // Helper function: Checks if the logged-in user is a Musician
+    function isMusician() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        getUserData().role == 'musician';
+    }
+
+    // Helper function: Checks if the logged-in user is a Choir Member
+    function isChoirMember() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        getUserData().role == 'choir_member';
+    }
+
+    // 1. Users collection:
+    // Anyone authenticated can read team directory.
+    // A user can create/update their own profile.
+    // Worship Leaders and Super Admins can update profiles to assign roles or proposed roles.
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      
+      // Allow user creation on initial signup
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Allow updates if it's the user's own profile, OR if the actor is an admin.
+      allow update: if isAuthenticated() && (
+        request.auth.uid == userId || isAdmin()
+      );
+      
+      // Only Super Admins can delete users
+      allow delete: if isSuperAdmin();
+    }
+    
+    // 2. Songs collection:
+    // Anyone authenticated can view songs.
+    // Worship Leaders, Musicians, and Choir members can add/create.
+    // Only Worship Leaders and Super Admins can delete.
+    // Worship Leaders, Musicians, Choir members, and Members with task clearance can edit (choir/members restricted to lyrics only).
+    match /songs/{songId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() || isMusician() || isChoirMember();
+      allow delete: if isAdmin();
+      allow update: if isAdmin() || isMusician() || (
+        (isChoirMember() || getUserData().role == 'member') &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'lyricsEnglish', 'lyricsTamil', 
+          'lastEditedBy', 'lastEditedByName', 'lastEditedAt', 'lastEditedFields'
+        ])
+      );
+    }
+    
+    // 3. Rosters collection:
+    // Anyone authenticated can view roster list and details.
+    // Only Worship Leaders and Super Admins can manage (create, edit, delete) rosters.
+    match /rosters/{rosterId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+      
+      // Roster readiness tracking subcollections (practiced/ready)
+      // Anyone authenticated can read status logs.
+      // Users can only toggle their own practiced/ready check-ins.
+      match /practiced/{userId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && request.auth.uid == userId;
+      }
+      
+      match /ready/{userId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && request.auth.uid == userId;
+      }
+    }
+    
+    // 4. Notifications collection:
+    // Anyone authenticated can read notices.
+    // Only Worship Leaders and Super Admins can create or delete notices.
+    // Anyone authenticated can update notices (to append their personal acknowledgement state!).
+    match /notifications/{notifId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isAdmin();
+      allow update: if isAuthenticated();
+    }
+
+    // 5. Tasks collection:
+    // Anyone authenticated can read tasks.
+    // Only Worship Leaders and Super Admins can create tasks.
+    // Assignee, creator, or admins can update a task.
+    match /tasks/{taskId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAuthenticated() && (
+        request.auth.uid in resource.data.assignedTo ||
+        resource.data.assignedTo == request.auth.uid || 
+        resource.data.assignedBy == request.auth.uid || 
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 6. Config collection:
+    // Anyone authenticated can read configuration settings.
+    // Only Super Admins can write or update configs.
+    match /config/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+  }
+}

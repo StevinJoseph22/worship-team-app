@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Worship Team App",
+    "slug": "worship-team-app",
+    "version": "1.0.0",
+    "icon": "./assets/icon.png",
+    "ios": {
+      "bundleIdentifier": "com.elimchurch.worshipteamapp",
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      }
+    },
+    "android": {
+      "package": "com.elimchurch.worshipteamapp",
+      "versionCode": 1,
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0F19"
+      }
+    },
+    "extra": {
+      "extra": {},
+      "eas": {
+        "projectId": "ea087c0c-28fd-47ab-8606-f356a9c7be49"
+      }
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-audio",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0B0F19"
+        }
+      ]
+    ]
+  }
+}

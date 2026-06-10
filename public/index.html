@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Elim Worship - Admin Portal</title>
+    <!-- Mammoth JS for reading Word Documents (.docx) in the browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0B0F19;
+            --card-bg: #1E293B;
+            --card-border: #334155;
+            --accent-color: #F59E0B;
+            --accent-hover: #D97706;
+            --text-main: #FFFFFF;
+            --text-muted: #94A3B8;
+            --danger: #EF4444;
+            --success: #10B981;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Glassmorphic Container */
+        .portal-card {
+            background-color: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .portal-card.wide {
+            max-width: 900px;
+        }
+
+        .header-logo {
+            font-size: 52px;
+            margin-bottom: 15px;
+            text-align: center;
+            filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.2));
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            text-align: center;
+            background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 500;
+            text-align: center;
+            margin: 0 0 32px 0;
+        }
+
+        /* Views management */
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-control {
+            width: 100%;
+            background-color: #0B0F19;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            height: 48px;
+            padding: 0 16px;
+            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 600;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .input-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: #0B0F19;
+            border: none;
+            border-radius: 12px;
+            height: 48px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--card-border);
+            box-shadow: none;
+            margin-top: 12px;
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: #FFFFFF;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+        .btn-danger:hover {
+            background-color: #DC2626;
+        }
+
+        .link-btn {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            cursor: pointer;
+        }
+
+        .link-btn:hover {
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        /* Bulk Uploader Styles */
+        .dropzone {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+            margin-bottom: 25px;
+            background-color: rgba(11, 15, 25, 0.3);
+        }
+
+        .dropzone.dragover, .dropzone:hover {
+            border-color: var(--accent-color);
+            background-color: rgba(245, 158, 11, 0.03);
+        }
+
+        .dropzone-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .dropzone-text {
+            font-size: 15px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* File list table & editor */
+        .songs-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        th {
+            background-color: #0B0F19;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .lyrics-preview-textarea {
+            width: 100%;
+            height: 100px;
+            background-color: #0B0F19;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 8px;
+            color: var(--text-main);
+            font-family: monospace;
+            font-size: 12px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        .song-title-input {
+            background-color: transparent;
+            border: 1px solid transparent;
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 14px;
+            width: 100%;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .song-title-input:focus {
+            outline: none;
+            background-color: #0B0F19;
+            border-color: var(--accent-color);
+        }
+
+        .row-action-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+        }
+
+        .row-action-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Loading indicator overlay */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(11, 15, 25, 0.85);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border-left-color: var(--accent-color);
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* Dashboard Header */
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+
+        .dash-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0;
+            text-align: left;
+        }
+
+        .admin-badge {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .btn-small {
+            height: 36px;
+            padding: 0 16px;
+            font-size: 13px;
+            width: auto;
+            box-shadow: none;
+        }
+
+        .admin-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. LOADING SCREEN OVERLAY -->
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <div id="loader-text" class="loader-text">Loading...</div>
+    </div>
+
+    <!-- MAIN PORTAL WRAPPER -->
+    <div id="portal-container" class="portal-card">
+        
+        <!-- ==================== VIEW A: MOBILE APP REDIRECT ==================== -->
+        <div id="view-redirect" class="view active">
+            <div class="header-logo">⛪</div>
+            <h1>Elim Worship Team</h1>
+            <p class="subtitle">Worship Team App Portal</p>
+
+            <div style="background-color: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 20px; margin-bottom: 30px; line-height: 1.6; font-size: 14px; color: #E2E8F0;">
+                ⚡ Redirecting you to the mobile app... If the application does not open automatically in 5 seconds, tap the button below.
+            </div>
+
+            <a href="elimworship://" class="btn" style="text-decoration: none;">Open App Now</a>
+            <a href="exp://" class="btn btn-outline" style="text-decoration: none; margin-top: 12px;">Open in Expo Go</a>
+            
+            <a onclick="switchView('view-login')" class="link-btn">🔒 Super Admin Portal</a>
+        </div>
+
+        <!-- ==================== VIEW B: LOGIN VIEW ==================== -->
+        <div id="view-login" class="view">
+            <div class="header-logo">👑</div>
+            <h1>Admin Authentication</h1>
+            <p class="subtitle">Super Admin Access Portal</p>
+
+            <div id="login-error" class="error-msg"></div>
+
+            <div class="form-group">
+                <label for="login-phone">Phone Number</label>
+                <input type="tel" id="login-phone" class="input-control" placeholder="e.g. 8088574858" required>
+            </div>
+
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" class="input-control" placeholder="••••••••" required>
+            </div>
+
+            <button id="btn-login" class="btn">Sign In</button>
+            <button onclick="switchView('view-redirect')" class="btn btn-outline">Back to Redirect</button>
+        </div>
+
+        <!-- ==================== VIEW C: ADMIN DASHBOARD (BULK UPLOAD) ==================== -->
+        <div id="view-dashboard" class="view">
+            <div class="dash-header">
+                <div>
+                    <h2 class="dash-title">Bulk Song Uploader <span class="admin-badge">Super Admin</span></h2>
+                    <div id="admin-user-info" class="admin-meta">Welcome, Admin</div>
+                </div>
+                <button id="btn-logout" class="btn btn-small btn-outline">Sign Out</button>
+            </div>
+
+            <div id="dashboard-error" class="error-msg"></div>
+
+            <div class="form-group">
+                <label for="upload-language">Target Lyrics Language</label>
+                <select id="upload-language" class="input-control" style="background-image: none; cursor: pointer;">
+                    <option value="auto">✨ Auto-Detect & Split Language</option>
+                    <option value="english">🇺🇸 English Only (Insert in English tab)</option>
+                    <option value="tamil">🇮🇳 Tamil Only (Insert in Tamil tab)</option>
+                </select>
+            </div>
+
+            <!-- Drag & Drop Zone -->
+            <div id="dropzone" class="dropzone">
+                <input type="file" id="file-input" multiple accept=".docx" style="display: none;">
+                <div class="dropzone-icon">📁</div>
+                <div class="dropzone-text">Drag & drop song Word documents (.docx) here<br><span style="font-size: 12px; font-weight: normal; color: var(--text-muted);">or click to browse from files</span></div>
+            </div>
+
+            <!-- Clipboard Paste Button -->
+            <button id="btn-paste-clipboard" class="btn btn-outline" style="margin-bottom: 25px;">📋 Paste Lyrics from Clipboard</button>
+
+            <!-- Upload Previews -->
+            <div id="preview-section" style="display: none; text-align: left;">
+                <label>Songs to Upload (<span id="songs-count">0</span>)</label>
+                <div class="songs-table-container">
+                    <table id="songs-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Song Title</th>
+                                <th style="width: 35%;">English Lyrics</th>
+                                <th style="width: 35%;">Tamil Lyrics</th>
+                                <th style="width: 5%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="songs-table-body">
+                            <!-- Dynamically populated rows -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <button id="btn-publish" class="btn">Publish Songs to Database</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase Script Implementations -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Firebase Configuration (production)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAn2P7lSkrM_9iaYZCR06Bc9TOKH36LIFo",
+            authDomain: "worshipteamapp-c84e2.firebaseapp.com",
+            projectId: "worshipteamapp-c84e2",
+            storageBucket: "worshipteamapp-c84e2.firebasestorage.app",
+            messagingSenderId: "750751907893",
+            appId: "1:750751907893:web:16e54b01b61154c3f0f17c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global states
+        let currentUserData = null;
+        let uploadedSongs = [];
+        let redirectTimeout = null;
+
+        // Utilities
+        window.switchView = function(viewId) {
+            // Clear any pending redirect if user navigates away from redirect page
+            if (viewId !== 'view-redirect' && redirectTimeout) {
+                clearTimeout(redirectTimeout);
+                redirectTimeout = null;
+            }
+            
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+
+            // Handle layout adjustments based on wide dashboard views
+            const container = document.getElementById('portal-container');
+            if (viewId === 'view-dashboard') {
+                container.classList.add('wide');
+            } else {
+                container.classList.remove('wide');
+            }
+        };
+
+        // Detect view mode from URL query parameters on load
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        const viewParam = urlParams.get('view');
+
+        if (mode === 'admin' || viewParam === 'login') {
+            switchView('view-login');
+        }
+
+        function showLoader(text) {
+            document.getElementById('loader-text').innerText = text || "Loading...";
+            document.getElementById('loader').style.display = 'flex';
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function stripCountryCode(phone) {
+            if (!phone) return "";
+            const codes = ["+91", "+1", "+44", "+61", "+65", "+971", "+27", "+49", "+33", "+81"];
+            for (const code of codes) {
+                if (phone.startsWith(code)) {
+                    return phone.substring(code.length);
+                }
+            }
+            return phone.replace(/^\+/, ""); // fallback
+        }
+
+        function getSyntheticEmail(phone) {
+            if (!phone) return "";
+            const clean = stripCountryCode(phone).replace(/\D/g, "");
+            return `${clean}@worshipteam.app`;
+        }
+
+        // Authentication changes listener
+        onAuthStateChanged(auth, async (firebaseUser) => {
+            if (firebaseUser) {
+                showLoader("Authenticating...");
+                try {
+                    const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+                    if (userDoc.exists() && userDoc.data().role === "super_admin") {
+                        currentUserData = userDoc.data();
+                        document.getElementById('admin-user-info').innerText = `Admin: ${currentUserData.displayName || "Chief Admin"} (${currentUserData.phone})`;
+                        switchView('view-dashboard');
+                    } else {
+                        await signOut(auth);
+                        showLoginError("Access Denied: Only Super Admins are allowed to access this portal.");
+                    }
+                } catch (e) {
+                    console.error("Auth check failed:", e);
+                    await signOut(auth);
+                    showLoginError("Authentication check failed: " + e.message);
+                } finally {
+                    hideLoader();
+                }
+            } else {
+                currentUserData = null;
+                // If on dashboard, kick out to redirect/login
+                const activeView = document.querySelector('.view.active');
+                if (activeView && activeView.id === 'view-dashboard') {
+                    switchView('view-redirect');
+                }
+
+                // Redirection for regular users (if not in admin/login mode)
+                const urlParams = new URLSearchParams(window.location.search);
+                const mode = urlParams.get('mode');
+                const viewParam = urlParams.get('view');
+                if (mode !== 'admin' && viewParam !== 'login') {
+                    if (redirectTimeout) clearTimeout(redirectTimeout);
+                    redirectTimeout = setTimeout(function() {
+                        const currentActiveView = document.querySelector('.view.active');
+                        if (currentActiveView && currentActiveView.id === 'view-redirect') {
+                            window.location.href = "elimworship://";
+                        }
+                    }, 1200);
+                }
+            }
+        });
+
+        // Error message triggers
+        function showLoginError(msg) {
+            const errBox = document.getElementById('login-error');
+            errBox.innerText = msg;
+            errBox.style.display = 'block';
+        }
+
+        function hideLoginError() {
+            document.getElementById('login-error').style.display = 'none';
+        }
+
+        function showDashboardError(msg) {
+            const errBox = document.getElementById('dashboard-error');
+            errBox.innerText = msg;
+            errBox.style.display = 'block';
+            errBox.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideDashboardError() {
+            document.getElementById('dashboard-error').style.display = 'none';
+        }
+
+        // Login Handler
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            hideLoginError();
+            const phone = document.getElementById('login-phone').value.trim();
+            const pass = document.getElementById('login-password').value;
+
+            if (!phone || !pass) {
+                showLoginError("Please enter both phone number and password.");
+                return;
+            }
+
+            showLoader("Signing in...");
+            try {
+                const email = getSyntheticEmail(phone);
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (err) {
+                console.error("Login failed:", err);
+                let msg = "Invalid credentials. Please verify your phone and password.";
+                if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+                    msg = "Incorrect phone number or password.";
+                } else if (err.code === "auth/invalid-email") {
+                    msg = "Invalid phone number format.";
+                }
+                showLoginError(msg);
+                hideLoader();
+            }
+        });
+
+        // Logout Handler
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            showLoader("Signing out...");
+            try {
+                await signOut(auth);
+                uploadedSongs = [];
+                renderPreviewTable();
+                switchView('view-redirect');
+            } catch (err) {
+                console.error("Sign out failed:", err);
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // Uploader Drag & Drop Events Setup
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                handleFiles(fileInput.files);
+            }
+        });
+
+        // Clipboard Paste Event Handler
+        const btnPasteClipboard = document.getElementById('btn-paste-clipboard');
+        btnPasteClipboard.addEventListener('click', async () => {
+            hideDashboardError();
+            try {
+                let text = "";
+                // Try modern Clipboard API
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    text = await navigator.clipboard.readText();
+                }
+                
+                // If text is empty or clipboard API failed/blocked, fallback to manual pasting modal
+                if (!text || text.trim().length === 0) {
+                    showPasteFallbackModal();
+                } else {
+                    processPastedText(text);
+                }
+            } catch (err) {
+                console.warn("Clipboard API failed: ", err);
+                showPasteFallbackModal();
+            }
+        });
+
+        function showPasteFallbackModal() {
+            let modal = document.getElementById('paste-fallback-modal');
+            if (!modal) {
+                // Create modal dynamically if it doesn't exist
+                modal = document.createElement('div');
+                modal.id = 'paste-fallback-modal';
+                modal.className = 'loader-overlay'; // Re-use loader overlay styling
+                modal.style.display = 'flex';
+                modal.style.zIndex = '2000';
+                modal.innerHTML = `
+                    <div class="portal-card" style="background-color: var(--card-bg); max-width: 450px; border: 1px solid var(--card-border); padding: 30px;">
+                        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #FFFFFF;">Paste Lyrics</h3>
+                            <button id="close-paste-modal" style="background: var(--card-border); color: var(--text-muted); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold;">✕</button>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; text-align: left;">Clipboard access was blocked or empty. Please paste your lyrics manually into the box below:</p>
+                        <textarea id="paste-modal-textarea" class="lyrics-preview-textarea" style="height: 180px; margin-bottom: 20px; font-family: sans-serif; font-size: 14px;" placeholder="Paste song lyrics here..."></textarea>
+                        <button id="btn-process-pasted" class="btn">Process & Import</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                document.getElementById('close-paste-modal').addEventListener('click', () => {
+                    modal.style.display = 'none';
+                });
+
+                document.getElementById('btn-process-pasted').addEventListener('click', () => {
+                    const content = document.getElementById('paste-modal-textarea').value.trim();
+                    if (!content) {
+                        alert("Please paste some lyrics first.");
+                        return;
+                    }
+                    modal.style.display = 'none';
+                    processPastedText(content);
+                });
+            } else {
+                document.getElementById('paste-modal-textarea').value = "";
+                modal.style.display = 'flex';
+            }
+        }
+
+        function processPastedText(rawText) {
+            if (!rawText || !rawText.trim()) return;
+            
+            const title = prompt("Enter Song Title:", "Pasted Song " + new Date().toLocaleDateString());
+            if (title === null) return; // user cancelled prompt
+            
+            const cleanTitle = title.trim() || "Pasted Song " + new Date().toLocaleDateString();
+            const targetLang = document.getElementById('upload-language').value;
+            
+            let englishLyrics = "";
+            let tamilLyrics = "";
+
+            if (targetLang === "english") {
+                englishLyrics = rawText;
+            } else if (targetLang === "tamil") {
+                tamilLyrics = rawText;
+            } else {
+                // Auto-Detect & Split line-by-line
+                const lines = rawText.split('\n');
+                const engLines = [];
+                const tamLines = [];
+
+                lines.forEach(line => {
+                    const trimmed = line.trim();
+                    if (!trimmed) {
+                        engLines.push("");
+                        tamLines.push("");
+                        return;
+                    }
+
+                    const hasTamil = /[\u0B80-\u0BFF]/.test(trimmed);
+                    if (hasTamil) {
+                        tamLines.push(trimmed);
+                    } else {
+                        engLines.push(trimmed);
+                    }
+                });
+
+                englishLyrics = cleanLines(engLines);
+                tamilLyrics = cleanLines(tamLines);
+            }
+
+            uploadedSongs.push({
+                id: Math.random().toString(36).substring(2, 9),
+                title: cleanTitle,
+                lyricsEnglish: englishLyrics,
+                lyricsTamil: tamilLyrics
+            });
+
+            renderPreviewTable();
+        }
+
+        // File Handler & Text Processing
+        async function handleFiles(filesList) {
+            hideDashboardError();
+            showLoader("Extracting files...");
+            const targetLang = document.getElementById('upload-language').value;
+
+            for (let i = 0; i < filesList.length; i++) {
+                const file = filesList[i];
+                if (!file.name.endsWith('.docx')) {
+                    showDashboardError("Invalid file type detected. Please only upload Word Document files (.docx).");
+                    continue;
+                }
+
+                try {
+                    const arrayBuffer = await readFileAsArrayBuffer(file);
+                    const mammothResult = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                    const rawText = mammothResult.value;
+
+                    // Parse title from filename
+                    const title = file.name.substring(0, file.name.lastIndexOf('.')).trim();
+
+                    // Distribute text to appropriate language channels
+                    let englishLyrics = "";
+                    let tamilLyrics = "";
+
+                    if (targetLang === "english") {
+                        englishLyrics = rawText;
+                    } else if (targetLang === "tamil") {
+                        tamilLyrics = rawText;
+                    } else {
+                        // Auto-Detect & Split line-by-line
+                        const lines = rawText.split('\n');
+                        const engLines = [];
+                        const tamLines = [];
+
+                        lines.forEach(line => {
+                            const trimmed = line.trim();
+                            if (!trimmed) {
+                                // Empty line padding
+                                engLines.push("");
+                                tamLines.push("");
+                                return;
+                            }
+
+                            // Tamil character range regex match
+                            const hasTamil = /[\u0B80-\u0BFF]/.test(trimmed);
+                            if (hasTamil) {
+                                tamLines.push(trimmed);
+                            } else {
+                                engLines.push(trimmed);
+                            }
+                        });
+
+                        // Filter empty padding lines from trailing edges
+                        englishLyrics = cleanLines(engLines);
+                        tamilLyrics = cleanLines(tamLines);
+                    }
+
+                    // Add to buffer
+                    uploadedSongs.push({
+                        id: Math.random().toString(36).substring(2, 9),
+                        title: title,
+                        lyricsEnglish: englishLyrics,
+                        lyricsTamil: tamilLyrics
+                    });
+
+                } catch (e) {
+                    console.error("Error parsing file " + file.name + ":", e);
+                    showDashboardError(`Failed to parse file "${file.name}": ` + e.message);
+                }
+            }
+
+            hideLoader();
+            renderPreviewTable();
+        }
+
+        function readFileAsArrayBuffer(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function cleanLines(lines) {
+            // Remove consecutive duplicates or massive blank spaces
+            let result = lines.join('\n');
+            // Clean trailing/leading spaces
+            return result.replace(/^\n+|\n+$/g, '').trim();
+        }
+
+        // Render Preview list Table
+        function renderPreviewTable() {
+            const tbody = document.getElementById('songs-table-body');
+            tbody.innerHTML = "";
+
+            if (uploadedSongs.length === 0) {
+                document.getElementById('preview-section').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('preview-section').style.display = 'block';
+            document.getElementById('songs-count').innerText = uploadedSongs.length;
+
+            uploadedSongs.forEach((song, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <input type="text" class="song-title-input" value="${escapeHtml(song.title)}" onchange="updateSongField('${song.id}', 'title', this.value)">
+                    </td>
+                    <td>
+                        <textarea class="lyrics-preview-textarea" onchange="updateSongField('${song.id}', 'lyricsEnglish', this.value)">${escapeHtml(song.lyricsEnglish)}</textarea>
+                    </td>
+                    <td>
+                        <textarea class="lyrics-preview-textarea" onchange="updateSongField('${song.id}', 'lyricsTamil', this.value)">${escapeHtml(song.lyricsTamil)}</textarea>
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="row-action-btn" onclick="removeSong('${song.id}')">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Inline editing callback bindings
+        window.updateSongField = function(songId, field, value) {
+            const song = uploadedSongs.find(s => s.id === songId);
+            if (song) {
+                song[field] = value;
+            }
+        };
+
+        window.removeSong = function(songId) {
+            uploadedSongs = uploadedSongs.filter(s => s.id !== songId);
+            renderPreviewTable();
+        };
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        // Publish to Database
+        document.getElementById('btn-publish').addEventListener('click', async () => {
+            hideDashboardError();
+            if (uploadedSongs.length === 0) return;
+
+            showLoader(`Publishing ${uploadedSongs.length} songs...`);
+            let successCount = 0;
+            let failCount = 0;
+
+            const songsCollRef = collection(db, "songs");
+
+            for (let i = 0; i < uploadedSongs.length; i++) {
+                const song = uploadedSongs[i];
+                if (!song.title.trim()) {
+                    failCount++;
+                    continue;
+                }
+
+                try {
+                    await addDoc(songsCollRef, {
+                        title: song.title.trim(),
+                        artist: "Unknown Artist",
+                        originalKey: "C Major",
+                        currentKey: "C Major",
+                        bpm: 0,
+                        timeSignature: "4/4",
+                        lyricsEnglish: song.lyricsEnglish.trim(),
+                        lyricsTamil: song.lyricsTamil.trim(),
+                        youtubeLink: "",
+                        spotifyLink: "",
+                        tags: [],
+                        ccli: "",
+                        notes: "",
+                        createdAt: new Date().toISOString()
+                    });
+                    successCount++;
+                } catch (writeErr) {
+                    console.error("Firestore save failed for " + song.title + ":", writeErr);
+                    failCount++;
+                }
+            }
+
+            hideLoader();
+
+            if (failCount > 0) {
+                showDashboardError(`Published ${successCount} songs successfully. Failed to publish ${failCount} songs. Check console logs.`);
+            } else {
+                alert(`🎉 Success! All ${successCount} songs have been successfully written to the Firestore database.`);
+                uploadedSongs = [];
+                renderPreviewTable();
+            }
+        });
+    </script>
+</body>
+</html>
