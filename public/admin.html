@@ -394,7 +394,7 @@
     <div id="portal-container" class="portal-card">
         
         <!-- ==================== VIEW A: MOBILE APP REDIRECT ==================== -->
-        <div id="view-redirect" class="view active">
+        <div id="view-redirect" class="view">
             <div class="header-logo">⛪</div>
             <h1>Elim Worship Team</h1>
             <p class="subtitle">Worship Team App Portal</p>
@@ -410,7 +410,7 @@
         </div>
 
         <!-- ==================== VIEW B: LOGIN VIEW ==================== -->
-        <div id="view-login" class="view">
+        <div id="view-login" class="view active">
             <div class="header-logo">👑</div>
             <h1>Admin Authentication</h1>
             <p class="subtitle">Super Admin Access Portal</p>
@@ -428,7 +428,7 @@
             </div>
 
             <button id="btn-login" class="btn">Sign In</button>
-            <button onclick="switchView('view-redirect')" class="btn btn-outline">Back to Redirect</button>
+            <button onclick="window.location.href = '/'" class="btn btn-outline">Back to Web App</button>
         </div>
 
         <!-- ==================== VIEW C: ADMIN DASHBOARD (BULK UPLOAD) ==================== -->
@@ -594,21 +594,7 @@
                 // If on dashboard, kick out to redirect/login
                 const activeView = document.querySelector('.view.active');
                 if (activeView && activeView.id === 'view-dashboard') {
-                    switchView('view-redirect');
-                }
-
-                // Redirection for regular users (if not in admin/login mode)
-                const urlParams = new URLSearchParams(window.location.search);
-                const mode = urlParams.get('mode');
-                const viewParam = urlParams.get('view');
-                if (mode !== 'admin' && viewParam !== 'login') {
-                    if (redirectTimeout) clearTimeout(redirectTimeout);
-                    redirectTimeout = setTimeout(function() {
-                        const currentActiveView = document.querySelector('.view.active');
-                        if (currentActiveView && currentActiveView.id === 'view-redirect') {
-                            window.location.href = "elimworship://";
-                        }
-                    }, 1200);
+                    switchView('view-login');
                 }
             }
         });
@@ -670,7 +656,7 @@
                 await signOut(auth);
                 uploadedSongs = [];
                 renderPreviewTable();
-                switchView('view-redirect');
+                window.location.href = '/';
             } catch (err) {
                 console.error("Sign out failed:", err);
             } finally {

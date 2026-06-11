@@ -11,6 +11,8 @@ import {
   Dimensions,
   ActivityIndicator,
   TextInput,
+  Platform,
+  Linking,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -494,6 +496,30 @@ export default function AdminPanelScreen({ user }) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* BULK UPLOADER PORTAL LINK (Visible to super_admin) */}
+          {user?.role === "super_admin" && (
+            <View style={styles.sectionContainer}>
+              <Text style={[styles.sectionHeader, { color: "#F59E0B", marginBottom: 6 }]}>📥 Bulk Song Uploader</Text>
+              <Text style={styles.sectionDescription}>
+                Access the Bulk Song Uploader portal to parse Word documents (.docx) and import song lyrics/chords to the database.
+              </Text>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                  if (Platform.OS === 'web') {
+                    window.open('/admin.html', '_blank');
+                  } else {
+                    Linking.openURL('https://worshipteamapp-c84e2.web.app/admin.html');
+                  }
+                }}
+                style={styles.uploaderBtn}
+              >
+                <Text style={styles.uploaderBtnText}>Open Bulk Song Uploader ➔</Text>
+              </TouchableOpacity>
+              <View style={styles.horizontalDivider} />
+            </View>
+          )}
+
           {/* 0. PENDING APPROVALS SECTION (Visible only to super_admin) */}
           {user?.role === "super_admin" && users.filter((u) => u.pendingRole).length > 0 && (
             <View style={styles.sectionContainer}>
@@ -1367,5 +1393,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
     marginRight: 6,
+  },
+  uploaderBtn: {
+    backgroundColor: "rgba(245, 158, 11, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(245, 158, 11, 0.3)",
+    borderRadius: 12,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  uploaderBtnText: {
+    color: "#F59E0B",
+    fontSize: 14,
+    fontWeight: "750",
   },
 });
