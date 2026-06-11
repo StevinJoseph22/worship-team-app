@@ -1,4 +1,4 @@
-import { Platform } from "react-native";
+import { Platform, Alert } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
@@ -40,6 +40,13 @@ export async function registerForPushNotificationsAsync() {
 
     if (finalStatus !== "granted") {
       console.warn("Push Notifications: Permission to receive push notifications was denied!");
+      if (Platform.OS !== "web") {
+        Alert.alert(
+          "🔔 Notifications Disabled",
+          "To receive real-time push notifications exactly like WhatsApp, please enable notifications for Worship Team App in your phone's Settings.",
+          [{ text: "OK" }]
+        );
+      }
       return null;
     }
 
