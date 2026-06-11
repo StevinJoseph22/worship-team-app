@@ -8,7 +8,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-async-storage/async-storage": "1.24.0",
     "expo": "~54.0.0",
     "expo-asset": "~12.0.13",
     "expo-audio": "~1.1.1",
@@ -27,9 +27,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
-  },
-  "overrides": {
-    "@react-native-async-storage/async-storage": "2.2.0"
   },
   "private": true
 }
