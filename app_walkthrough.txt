@@ -1,0 +1,159 @@
+========================================================================
+ELIM WORSHIP TEAM APPLICATION - COMPLETE SYSTEM WALKTHROUGH
+========================================================================
+
+Welcome to the comprehensive walkthrough of the Elim Worship Team Application. 
+This text file serves as a detailed functional guide to the entire 
+application ecosystem, covering every user flow, screen, role permission, 
+and administrative feature.
+
+------------------------------------------------------------------------
+SECTION 1: APP SCREENS & FEATURES WALKTHROUGH
+------------------------------------------------------------------------
+
+1. ONBOARDING & AUTHENTICATION FLOW
+----------------------------------
+* Onboarding Slides: Glassmorphic onboarding slides introducing:
+  - Service Planning & Setlists (Roster schedules & song lists)
+  - Transposition Engine (Chord adjustments & Nashville Number System)
+  - Smart Task Delegation (Task tracking and practice readiness check-ins)
+  - Analytics Hub (Roster plans, completion charts, and song trends)
+* Dual Login Modes: Sign in with Password or OTP (SMS).
+* International Support: Interactive dropdown country dial code selector 
+  (e.g., India +91, Canada/USA +1, UK +44, etc.).
+* Password Reset Flow: Triggers verification OTP via SMS to allow setting 
+  a new password.
+
+2. HOME DASHBOARD & LIVE SETLIST
+--------------------------------
+* Upcoming Service Roster: Instantly highlights the next service details 
+  (date, time, theme) at the top of the dashboard.
+* Practice Readiness Check-In: A premium action card allowing members to 
+  declare they are "Ready" for the service, updating leaderboards in real-time.
+* Setlist View: Carousel/list showing songs selected for the upcoming service 
+  with keys, tempos, and quick-tap shortcuts to open song details.
+* Recent Announcements: Real-time notifications and announcements posted by 
+  worship leaders.
+
+3. SONG LIBRARY & TRANSPOSITION ENGINE
+--------------------------------------
+* Dynamic Search & Filter: Search songs by title or lyric keywords on the fly.
+* Tamil & English Bilingual Tabs: Separate layouts displaying parallel Tamil/English lyrics.
+* Transposition Control: Adjust keys up or down instantly. The chord parser 
+  re-calculates all chords dynamically.
+* Sharp/Flat Customizer: Change accidentals (e.g., A# to Bb) to match instrument preferences.
+* Nashville Number System (NNS): Toggle to display chords as numbers (1, 4, 5) 
+  for music theory.
+* Practice Kit Tools:
+  - Integrated Metronome: Tap-tempo, visual flash beat, and click sound.
+  - Play-Along Audio: Embedded audio tracks for vocal guides or backing tracks.
+  - Organize Sections: Collapse/expand sections (Intro, Verse, Chorus) for quick scanning.
+
+4. SERVICE PLANNING & ROSTER SCREEN
+-----------------------------------
+* Roster Planner: Schedule upcoming service details, dates, themes, and notes.
+* Worship Leader Filtering: Restricts leader selection exclusively to users 
+  holding the 'worship_leader' role.
+* Vocalist & Instrumentalist Scheduler: Search and assign musicians (Guitar, 
+  Keys, Drums) and choir members.
+* WhatsApp Notification Builder: Auto-generates template text with direct links 
+  to the web app (https://worshipteamapp-c84e2.web.app) for copy-pasting to 
+  WhatsApp groups.
+
+5. SMART TASKS & CHECK-INS
+---------------------------
+* Task List: View assigned preparation tasks (e.g., "Learn keys synth intro", 
+  "Review vocal harmonies").
+* Creation & Delegation Form: Worship leaders select assignees from the user 
+  directory, set due dates, and add custom instructions.
+* Deadline Alerts: Color-coded badges indicating upcoming or past due tasks.
+* Readiness Analytics: Displays progress charts of practice check-ins across 
+  the vocal and music bands.
+
+6. ADMIN PANEL & BULK UPLOADER
+------------------------------
+* Clearance Promotions: Super admins approve pending role change requests.
+* User Directory: Search and manage users' profiles, roles, and readiness history.
+* Bulk Song Uploader (/admin.html):
+  - Drag-and-Drop Parser: Drag Word documents (.docx) to automatically extract 
+    the song title and separate Tamil/English lyrics.
+  - Auto-Language Splitting: Scans lines and splits them into Tamil and English categories.
+  - Direct Firestore Write: Uploads multiple parsed songs to the database 
+    in a single click.
+
+------------------------------------------------------------------------
+SECTION 2: ROLE PERMISSIONS GRID
+------------------------------------------------------------------------
+
+The application utilizes a role-based access control system to customize 
+the interface depending on user responsibilities:
+
+1. SUPER ADMIN (👑)
+   - Capabilities: System directory management. Approves pending role changes 
+     proposed by Worship Leaders. Accesses the Bulk Song Uploader (/admin.html) 
+     to inject songs.
+
+2. WORSHIP LEADER (👑)
+   - Capabilities: Full planning clearance. Can create rosters, build setlists, 
+     edit song details, delegate tasks to team members, and check analytics.
+
+3. BAND MUSICIAN (🎸)
+   - Capabilities: Practice clearance. Can view setlists, transpose chords/tabs, 
+     toggle NNS, use practice metronome/audio, and mark tasks as complete.
+
+4. CHOIR VOCALIST (🎤)
+   - Capabilities: Vocal clearance. Can view lyric sheets (Tamil/English tabs), 
+     practice harmonies with play-along audios, and check-in readiness.
+
+5. TEAM MEMBER (⛪)
+   - Capabilities: Default registration state. View-only access to published 
+     rosters, bulletins, and the song search directory.
+
+------------------------------------------------------------------------
+SECTION 3: COMPLETE USER FLOWS
+------------------------------------------------------------------------
+
+1. NEW MEMBER ONBOARDING & VERIFICATION FLOW
+   - Step 1: New member opens app, completes onboarding slides.
+   - Step 2: Member registers using Name, Phone Number, and Password.
+   - Step 3: Firebase Auth registers account, Firestore creates profile (Default role: 'member').
+   - Step 4: User sees "Awaiting Approval" dashboard.
+   - Step 5: Worship Leader/Super Admin reviews registration in "Admin Panel" -> "New Signups".
+   - Step 6: Admin taps "Promote" and selects role (e.g. Musician/Vocalist).
+   - Step 7: (Optional) If Worship Leader proposes role change, Super Admin approves.
+   - Step 8: Firestore updates user role; full clearance is granted instantly.
+
+2. SERVICE PLANNING & SETLIST FLOW
+   - Step 1: Worship Leader goes to Roster tab -> Creates New Service.
+   - Step 2: Inputs theme, date, time, and selects scheduled Worship Leader.
+   - Step 3: Adds songs from the song library to the service setlist.
+   - Step 4: Assigns team members to roles (Keyboard, Bass, Vocals, etc.).
+   - Step 5: Taps "Publish Roster".
+   - Step 6: App writes document to Firestore, creating a general notification bulletin.
+   - Step 7: App triggers background notifications to scheduled members: "New Roster Published!"
+   - Step 8: Leader copies generated WhatsApp message template and pastes it in the team group chat.
+
+3. PRACTICE & READINESS FLOW
+   - Step 1: Musician/Vocalist clicks notification link, opening the dashboard.
+   - Step 2: Taps on a song in the setlist to open Song Details.
+   - Step 3: Transposes chord sheet to their desired key, toggles sharp/flat accidentals or NNS.
+   - Step 4: Listens to reference play-along audio track and uses metronome click for tempo.
+   - Step 5: Completes assigned preparation tasks and marks them done in Tasks Screen.
+   - Step 6: Returns to Home dashboard and taps "I am Ready!" for the service.
+   - Step 7: Firestore updates readiness status. Worship Leader views 100% completion in Analytics.
+
+------------------------------------------------------------------------
+SECTION 4: TECHNOLOGY STACK ARCHITECTURE
+------------------------------------------------------------------------
+
+* Frontend Mobile & Web App: Built with React Native and React Native Web, 
+  running on Expo SDK 54 to target Android (APK), iOS, and Web browsers 
+  (https://worshipteamapp-c84e2.web.app) from a single codebase.
+* Database & Storage: Firebase Firestore handles real-time database updates 
+  (rosters, songs, user accounts, and tasks). Firebase Storage hosts play-along 
+  audio tracks.
+* Authentication: Firebase Auth supporting custom phone-number accounts 
+  (mapped to synthetic email addresses) for Password and SMS OTP flows.
+* Notifications Engine: Expo Notifications integrated with custom native config 
+  plugins for background and locked-screen system tray alerts.
+========================================================================
